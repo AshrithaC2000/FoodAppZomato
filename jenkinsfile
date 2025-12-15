@@ -1,12 +1,7 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     tools {
-        jdk 'jdk17'
         nodejs 'node23'
     }
 
@@ -25,19 +20,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t zomato:latest .'
-            }
-        }
-
-        stage('Tag & Push to DockerHub') {
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'docker',
@@ -46,10 +29,26 @@ pipeline {
                 )]) {
                     sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker tag zomato:latest kastrov/zomato:latest
-                    docker push kastrov/zomato:latest
                     '''
                 }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ashrithac2000/zomato:latest .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push ashrithac2000/zomato:latest'
             }
         }
 
@@ -57,7 +56,7 @@ pipeline {
             steps {
                 sh '''
                 docker rm -f zomato || true
-                docker run -d --name zomato -p 3000:3000 kastrov/zomato:latest
+                docker run -d --name zomato -p 3000:3000 ashrithac2000/zomato:latest
                 '''
             }
         }
