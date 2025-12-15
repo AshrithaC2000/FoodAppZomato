@@ -1,7 +1,12 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     tools {
+        jdk 'jdk17'
         nodejs 'node23'
     }
 
@@ -23,12 +28,12 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'docker',
+                    credentialsId: 'dockerhub',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                      echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                     '''
                 }
             }
@@ -46,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Image to DockerHub') {
             steps {
                 sh 'docker push ashrithac2000/zomato:latest'
             }
