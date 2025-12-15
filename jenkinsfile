@@ -14,12 +14,6 @@ pipeline {
             }
         }
 
-        stage('Git Checkout') {
-            steps {
-                git 'https://github.com/staragile2016/FoodAppZomato.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
